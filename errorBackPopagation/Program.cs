@@ -1,25 +1,25 @@
 ﻿namespace errorBackPopagation
 {
-    class neuralNetwork
+    class NeuralNetwork
     {
-        private List<neuron> hiddenLayer;
-        private neuron outNeuron;
-        private double[] input;
-        private double[] outHidden;
-        private double output;
+        private List<Neuron> _hiddenLayer;
+        private Neuron _outNeuron;
+        private double[] _input;
+        private double[] _outHidden;
+        private double _output;
 
-        public neuralNetwork(int countOfHiddenNeurons)
+        public NeuralNetwork(int countOfHiddenNeurons)
         {
-            input = new double[2];
-            hiddenLayer = new List<neuron>();
-            outHidden = new double[countOfHiddenNeurons];
+            _input = new double[2];
+            _hiddenLayer = new List<Neuron>();
+            _outHidden = new double[countOfHiddenNeurons];
 
             for (int i = 0; i < countOfHiddenNeurons; i++)
             {
-                hiddenLayer.Add(new neuron(2));
+                _hiddenLayer.Add(new Neuron(2));
             }
 
-            outNeuron = new neuron(4);
+            _outNeuron = new Neuron(countOfHiddenNeurons);
         }
 
         public void LearningNeuralNetwork(double[][] input, int[] D)
@@ -33,69 +33,69 @@
 
                 for (int i = 0; i < input.Length; i++)
                 {
-                    this.input = input[i];
+                    this._input = input[i];
 
-                    for (int j = 0; j < hiddenLayer.Count; j++)
+                    for (int j = 0; j < _hiddenLayer.Count; j++)
                     {
-                        hiddenLayer[j].ForwardMovement(this.input);
-                        outHidden[j] = hiddenLayer[j].Y;
+                        _hiddenLayer[j].ForwardMovement(this._input);
+                        _outHidden[j] = _hiddenLayer[j].Y;
                     }
 
-                    outNeuron.ForwardMovement(outHidden);
-                    output = outNeuron.Y;
+                    _outNeuron.ForwardMovement(_outHidden);
+                    _output = _outNeuron.Y;
 
-                    outNeuron.ErrorBackForLastNeuron(D[i]);
-                    for (int j = hiddenLayer.Count - 1; j >= 0; j--)
+                    _outNeuron.ErrorBackForLastNeuron(D[i]);
+                    for (int j = _hiddenLayer.Count - 1; j >= 0; j--)
                     {
-                        hiddenLayer[j].ErrorBack(outNeuron.W[j], outNeuron.E);
+                        _hiddenLayer[j].ErrorBack(_outNeuron.W[j], _outNeuron.E);
                     }
 
-                    outNeuron.ChangeWeigth();
-                    for (int j = hiddenLayer.Count - 1; j >= 0; j--)
+                    _outNeuron.ChangeWeigth();
+                    for (int j = _hiddenLayer.Count - 1; j >= 0; j--)
                     {
-                        hiddenLayer[j].ChangeWeigth();
+                        _hiddenLayer[j].ChangeWeigth();
                     }
                 }
-            } while (iterations < 10000);
+            } while (iterations < 500);
 
             Console.WriteLine("Обучение завершено!\n");
         }
 
         public void SolutionOfProblem(double[] input)
         {
-            this.input = input;
+            this._input = input;
 
-            for (int i = 0; i < hiddenLayer.Count; i++)
+            for (int i = 0; i < _hiddenLayer.Count; i++)
             {
-                hiddenLayer[i].ForwardMovement(input);
-                outHidden[i] = hiddenLayer[i].Y;
+                _hiddenLayer[i].ForwardMovement(input);
+                _outHidden[i] = _hiddenLayer[i].Y;
             }
 
-            outNeuron.ForwardMovement(outHidden);
-            output = outNeuron.Y;
+            _outNeuron.ForwardMovement(_outHidden);
+            _output = _outNeuron.Y;
 
 
-            Console.WriteLine($"X1 = {this.input[0]} X2 = {this.input[1]} Y = {output}");
+            Console.WriteLine($"X1 = {this._input[0]} X2 = {this._input[1]} Y = {_output}");
         }
     }
 
-    class neuron
+    class Neuron
     {
         public double[] W { get; set; }
         public double E { get; set; }
         public double Y { get; set; }
 
-        private double[] X;
-        private const int X0 = 1;
-        private double b = 1;
-        private double NetRes;
-        private double N = 0.5;
+        private const int _x0 = 1;
+        private double[] _x;
+        private double _b = 1;
+        private double _netRes;
+        private double _n = 8;
 
-        public neuron(int countOfInputs)
+        public Neuron(int countOfInputs)
         {
             Random rnd = new Random();
             W = new double[countOfInputs];
-            X = new double[countOfInputs];
+            _x = new double[countOfInputs];
             for (int i = 0; i < countOfInputs; i++)
             {
                 W[i] = rnd.NextDouble() + 0.2;
@@ -104,26 +104,26 @@
 
         public void Net()
         {
-            NetRes = 0;
+            _netRes = 0;
 
-            for (int i = 0; i < X.Length; i++)
+            for (int i = 0; i < _x.Length; i++)
             {
-                NetRes += W[i] * X[i];
+                _netRes += W[i] * _x[i];
             }
 
-            NetRes += b * X0;
+            _netRes += _b * _x0;
         }
 
         public void ActivateFunction()
         {
-            Y = 1 / (1 + Math.Exp(-NetRes));
+            Y = 1 / (1 + Math.Exp(-_netRes));
         }
 
         public void ForwardMovement(double[] X)
         {
             for (int i = 0; i < X.Length; i++)
             {
-                this.X[i] = X[i];
+                this._x[i] = X[i];
             }
 
             Net();
@@ -142,11 +142,11 @@
 
         public void ChangeWeigth()
         {
-            for (int i = 0; i < X.Length; i++)
+            for (int i = 0; i < _x.Length; i++)
             {
-                W[i] -= N * E * X[i];
+                W[i] -= _n * E * _x[i];
             }
-            b -= N * E * X0;
+            _b -= _n * E * _x0;
         }
     }
     internal class Program
@@ -160,13 +160,13 @@
             input[3] = new double[] { 1, 1 };
             int[] D = new int[] {0, 1, 1, 0};
 
-            neuralNetwork networkOne = new neuralNetwork(4);
+            NeuralNetwork networkOne = new NeuralNetwork(2);
 
             networkOne.LearningNeuralNetwork(input, D);
 
             Console.WriteLine("Решение задачи:");
 
-            for (int i = 0; i < input.Length; i++)
+            for (int i = input.Length - 1; i >= 0; i--)
             {
                 networkOne.SolutionOfProblem(input[i]);
             }
